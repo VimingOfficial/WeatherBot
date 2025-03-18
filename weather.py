@@ -1,16 +1,14 @@
 import requests
-import time
-from datetime import datetime, time as dtime
+from datetime import datetime, time
 from telegram import Update
 from telegram.ext import Application, CommandHandler, ContextTypes
 
 # Add your own bot token and openweathermap API
 BOT_TOKEN = 'TELEGRAM-BOT-TOKEN'
-API_KEY = 'WEATHER-API'
+API_KEY = 'OPENWEATHERMAP-API'
 
-# Define the cities and times for which to fetch weather
-cities = ["City1", "City2"]  # Replace with your chosen cities
-time_ranges = [(6, 8), (10, 12), (14, 16)]  # Replace your time range
+# Define the cities for which to fetch weather
+cities = ["City1", "city2"]  # Replace with your chosen cities
 
 # Function to fetch weather for a specific city
 def get_weather(city):
@@ -20,17 +18,16 @@ def get_weather(city):
         data = response.json()
         weather_desc = data["weather"][0]["description"]
         temp = data["main"]["temp"]
-        return f"{city}: {weather_desc}, {temp}°C"
+        wind_speed = data["wind"]["speed"]
+        return f"{city}: {weather_desc}, {temp}°C, {wind_speed}kph"
     else:
         return f"Could not retrieve weather data for {city}."
 
-# Function to compile weather report for specified times
+# Function to compile weather report
 def get_weather_report():
     report = f"Weather Report ({datetime.now().strftime('%Y-%m-%d')})\n"
-    for start, end in time_ranges:
-        report += f"\nBetween {start}:00 and {end}:00:\n"
-        for city in cities:
-            report += get_weather(city) + "\n"
+    for city in cities:
+        report += get_weather(city) + "\n"
     return report
 
 # Function to send the weather report
@@ -66,7 +63,7 @@ async def report(update: Update, context: ContextTypes.DEFAULT_TYPE):
 # Function to run scheduler in the background
 def run_scheduler(application):
     job_queue = application.job_queue
-    job_queue.run_daily(send_weather_report, time=dtime(hour=5, minute=30))
+    job_queue.run_daily(send_weather_report, time=time(hour=5, minute=30))
 
 # Main function to set up and start the bot
 def main():
